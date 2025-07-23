@@ -17,64 +17,68 @@
 #include "material.h"
 #include "sphere.h"
 
-
 int main() {
     hittable_list world;
 
-    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    world.add(make_shared<sphere>(point3(0,-1000,0), 1000, ground_material));
+    // Chão escuro difuso
+    auto ground_material = make_shared<lambertian>(color(0.05, 0.05, 0.08));
+    world.add(make_shared<sphere>(point3(0, -1000, 0), 1000, ground_material));
 
-    for (int a = -11; a < 11; a++) {
-        for (int b = -11; b < 11; b++) {
-            auto choose_mat = random_double();
-            point3 center(a + 0.9*random_double(), 0.2, b + 0.9*random_double());
+    // "Sol" - esfera grande brilhante ao fundo
+    auto sun_material = make_shared<metal>(color(1.0, 0.95, 0.7), 0.0);
+    world.add(make_shared<sphere>(point3(0, 10, -30), 8.0, sun_material));
 
-            if ((center - point3(4, 0.2, 0)).length() > 0.9) {
-                shared_ptr<material> sphere_material;
+    // Planetas (esferas menores, alinhadas em perspectiva)
+    // Mercúrio (pequeno, metálico)
+    auto mercury_material = make_shared<metal>(color(0.8, 0.8, 0.7), 0.1);
+    world.add(make_shared<sphere>(point3(-3.5, 0.5, -6), 0.5, mercury_material));
 
-                if (choose_mat < 0.8) {
-                    // diffuse
-                    auto albedo = color::random() * color::random();
-                    sphere_material = make_shared<lambertian>(albedo);
-                    world.add(make_shared<sphere>(center, 0.2, sphere_material));
-                } else if (choose_mat < 0.95) {
-                    // metal
-                    auto albedo = color::random(0.5, 1);
-                    auto fuzz = random_double(0, 0.5);
-                    sphere_material = make_shared<metal>(albedo, fuzz);
-                    world.add(make_shared<sphere>(center, 0.2, sphere_material));
-                } else {
-                    // glass
-                    sphere_material = make_shared<dielectric>(1.5);
-                    world.add(make_shared<sphere>(center, 0.2, sphere_material));
-                }
-            }
-        }
-    }
+    // Vênus (vidro)
+    auto venus_material = make_shared<dielectric>(1.45);
+    world.add(make_shared<sphere>(point3(-2.2, 0.7, -7.5), 0.7, venus_material));
 
-    auto material1 = make_shared<dielectric>(1.5);
-    world.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
+    // Terra (difuso azul)
+    auto earth_material = make_shared<lambertian>(color(0.2, 0.3, 0.8));
+    world.add(make_shared<sphere>(point3(-0.7, 1.0, -9), 1.0, earth_material));
 
-    auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
-    world.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
+    // Marte (difuso avermelhado)
+    auto mars_material = make_shared<lambertian>(color(0.8, 0.3, 0.2));
+    world.add(make_shared<sphere>(point3(1.0, 0.8, -11), 0.8, mars_material));
 
-    auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
-    world.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
+    // Júpiter (grande, metálico)
+    auto jupiter_material = make_shared<metal>(color(0.9, 0.8, 0.6), 0.05);
+    world.add(make_shared<sphere>(point3(3.0, 1.8, -15), 1.8, jupiter_material));
 
+    // Saturno (grande, vidro)
+    auto saturn_material = make_shared<dielectric>(1.3);
+    world.add(make_shared<sphere>(point3(6.0, 1.5, -19), 1.5, saturn_material));
+
+    // Urano (azulado, metálico)
+    auto uranus_material = make_shared<metal>(color(0.6, 0.8, 0.9), 0.2);
+    world.add(make_shared<sphere>(point3(8.5, 1.2, -23), 1.2, uranus_material));
+
+    // Netuno (azul escuro, difuso)
+    auto neptune_material = make_shared<lambertian>(color(0.1, 0.2, 0.5));
+    world.add(make_shared<sphere>(point3(10.5, 1.1, -26), 1.1, neptune_material));
+
+    // Plutão (pequeno, vidro)
+    auto pluto_material = make_shared<dielectric>(1.6);
+    world.add(make_shared<sphere>(point3(12.0, 0.4, -28), 0.4, pluto_material));
+
+    // Câmera com profundidade de campo focando na Terra
     camera cam;
-
     cam.aspect_ratio      = 16.0 / 9.0;
     cam.image_width       = 1200;
-    cam.samples_per_pixel = 10;
-    cam.max_depth         = 20;
+    cam.samples_per_pixel = 70;
+    cam.max_depth         = 25;
 
-    cam.vfov     = 20;
-    cam.lookfrom = point3(13,2,3);
-    cam.lookat   = point3(0,0,0);
-    cam.vup      = vec3(0,1,0);
+    cam.vfov     = 30;
+    cam.lookfrom = point3(-2.0, 2.5, 2.0); // posição da câmera
+    cam.lookat   = point3(-0.7, 1.0, -9.0); // foca na Terra
+    cam.vup      = vec3(0, 1, 0);
 
-    cam.defocus_angle = 0.6;
-    cam.focus_dist    = 10.0;
+    cam.defocus_angle = 0.5; // profundidade de campo
+    cam.focus_dist    = (cam.lookfrom - cam.lookat).length();
 
     cam.render(world);
 }
