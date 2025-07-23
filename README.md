@@ -17,3 +17,6 @@ You can view it on your computer if it supports or use a online ppm viewer.
 
 ## Our team
 *   [André Esteves](https://github.com/andretva777)
+*   [Eric Lopes](https://github.com/Erictf32)
+*   [Guilherme Braga](https://github.com/gbraga29)
+*   [Gustavo Bianchini](https://github.com/gustavo-bm)
